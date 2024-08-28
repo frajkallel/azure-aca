@@ -35,4 +35,5 @@ resource "azurerm_container_app" "tcp-echo" {
       percentage      = 100
     }
   }   
+  depends_on = [ azurerm_container_app_environment.fk-apps-env ]
 }
