@@ -1,8 +1,3 @@
-data "azurerm_user_assigned_identity" "pyapi_id" {
-  name                = "fkallel-aca-id"
-  resource_group_name = data.azurerm_resource_group.rg.name
-}
-
 resource "azurerm_container_app" "pyapi" {
   name                         = "pyapi"
   container_app_environment_id = azurerm_container_app_environment.fk-apps-env.id
@@ -26,7 +21,7 @@ resource "azurerm_container_app" "pyapi" {
       }
       env {
         name = "db_password"
-        value = "xxxx!"
+        value = "xxxx"
       }
       env {
         name = "db_host"
@@ -42,7 +37,7 @@ resource "azurerm_container_app" "pyapi" {
       }
       env {
         name = "container_name"
-        value = "fkbucket"
+        value = "xxxx"
       }
       env {
         name        = "dbhost"
@@ -61,6 +56,8 @@ resource "azurerm_container_app" "pyapi" {
         path = "/data"
       }
     }
+    max_replicas = 1
+    min_replicas = 1
     volume {
       name = "az-volume"
       storage_type = "Secret"
@@ -73,7 +70,7 @@ resource "azurerm_container_app" "pyapi" {
 
   }
   ingress {
-    allow_insecure_connections = false
+    allow_insecure_connections = true
     external_enabled           = true
     target_port                = 8080
     transport                  = "auto"
@@ -84,24 +81,25 @@ resource "azurerm_container_app" "pyapi" {
     }
   }
   identity {
-    type = "UserAssigned"
-    identity_ids = [data.azurerm_user_assigned_identity.pyapi_id.id]
+    type = "SystemAssigned"
   }
   secret {
     name = "testfk"
-    identity = data.azurerm_user_assigned_identity.pyapi_id.id
-    key_vault_secret_id = "https://fkazkv.vault.azure.net/secrets/testfk"
-  }
+    identity = "System"
+    key_vault_secret_id = "https://xxxx.vault.azure.net/secrets/testfk"
+  }  
   secret {
     name = "dbhost"
-    identity = data.azurerm_user_assigned_identity.pyapi_id.id
-    key_vault_secret_id = "https://fkazkv.vault.azure.net/secrets/dbhost"
+    identity = "System"
+    key_vault_secret_id = "https://xxxx.vault.azure.net/secrets/dbhost"
   }
   secret {
     name = "dbpassword"
-    identity = data.azurerm_user_assigned_identity.pyapi_id.id
-    key_vault_secret_id = "https://fkazkv.vault.azure.net/secrets/dbpassword"
-  }    
+    identity = "System"
+    key_vault_secret_id = "https://xxxx.vault.azure.net/secrets/dbpassword"
+  }
+
+  depends_on = [ azurerm_container_app_environment.fk-apps-env ]    
   
 }
 
